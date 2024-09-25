@@ -1,9 +1,9 @@
 import React from 'react';
 
-const Courses = ({ subscribedCourses, onUnsubscribe }) => {
+const MyCourses = ({ subscribedCourses, onUnsubscribe }) => {
   return (
     <div>
-      <h2>Courses</h2>
+      <h2>My Courses</h2>
       <ul>
         {subscribedCourses.length > 0 ? (
           subscribedCourses.map((course) => (
@@ -20,4 +20,4 @@ const Courses = ({ subscribedCourses, onUnsubscribe }) => {
   );
 };
 
-export default Courses;
+export default MyCourses;

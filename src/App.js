@@ -3,7 +3,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import './App.css';
 import Grid from '@mui/material/Grid2';
 import CourseList from './components/CourseList';
-import Courses from './components/Courses';
+import Courses from './components/MyCourses';
 import SubscriptionBasket from './components/SubscriptionBasket'; // Optional Drag and Drop
 
 function App() {
@@ -21,14 +21,27 @@ function App() {
     // Dropped outside any droppable area
     if (!destination) return;
 
-    if (source.droppableId === 'courses' && destination.droppableId === 'subscribed') {
+    if (source.droppableId === destination.droppableId) {
+      // Handle reordering within the same list (either "courses" or "subscribed")
+      if (source.droppableId === 'courses') {
+        const reorderedCourses = Array.from(courses);
+        const [movedCourse] = reorderedCourses.splice(source.index, 1);
+        reorderedCourses.splice(destination.index, 0, movedCourse);
+        setCourses(reorderedCourses);
+      }
+    } else if (source.droppableId === 'courses' && destination.droppableId === 'subscribed') {
       // Moving from available courses to subscribed courses
       const draggedCourse = courses[source.index];
       if (!subscribedCourses.some((course) => course.id === draggedCourse.id)) {
         setSubscribedCourses([...subscribedCourses, draggedCourse]);
+
+        // Remove the course from the available courses list
+        const remainingCourses = courses.filter(course => course.id !== draggedCourse.id);
+        setCourses(remainingCourses);
       }
     }
   };
+
 
   const handleSubscribe = (course) => {
     if (!subscribedCourses.some((c) => c.id === course.id)) {
@@ -37,8 +50,15 @@ function App() {
   };
 
   const handleUnsubscribe = (course) => {
+    // Remove the course from the subscribed list
     setSubscribedCourses(subscribedCourses.filter((c) => c.id !== course.id));
+
+    // Add the unsubscribed course back to the available courses list
+    if (!courses.some((c) => c.id === course.id)) {
+      setCourses([...courses, course]);
+    }
   };
+
 
   return (
     <div className="App">
@@ -47,7 +67,6 @@ function App() {
         {/* Droppable for available courses */}
         <Grid container>
           <Grid item size={6}>
-
             <Droppable droppableId="courses">
               {(provided) => (
                 <div className="course-list" {...provided.droppableProps} ref={provided.innerRef}>
@@ -78,13 +97,23 @@ function App() {
           <Grid item size={6}>
             {/* Droppable for subscribed courses */}
             <Droppable droppableId="subscribed">
-              {(provided) => (
-                <div className="subscription-basket" {...provided.droppableProps} ref={provided.innerRef}>
-                  <h2>Subscribed Courses</h2>
+              {(provided, snapshot) => (
+                <div
+                  className="subscription-basket"
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  style={{
+                    backgroundColor: snapshot.isDraggingOver ? 'lightblue' : 'white', // Change background on hover
+                    transition: 'background-color 0.3s ease',
+                  }}
+                >
+                  <h2>My Courses</h2>
                   {subscribedCourses.length > 0 ? (
                     subscribedCourses.map((course, index) => (
-                      <div key={course.id}>
+                      <div key={course.id} className="subscribed-course-card">
                         <h3>{course.title}</h3>
+                        <p>{course.description}</p>
+                        <p>Duration: {course.duration} hours</p>
                         <button onClick={() => handleUnsubscribe(course)}>Unsubscribe</button>
                       </div>
                     ))

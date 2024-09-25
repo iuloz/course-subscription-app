@@ -13,7 +13,7 @@
   min-height: 300px;
 }
 
-.course-card {
+.course-card, .subscribed-course-card {
   background-color: #f4f4f4;
   padding: 15px;
   margin-bottom: 10px;
