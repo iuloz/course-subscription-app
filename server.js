@@ -19,6 +19,7 @@ mongoose.connect('mongodb+srv://doadmin:J07269aVpoe35Bf4@db-mongodb-new-analytic
 
 // Course Schema
 const courseSchema = new mongoose.Schema({
+  courseId: Number,
   title: String,
   description: String,
   duration: String,
@@ -28,7 +29,7 @@ const Course = mongoose.model('Course', courseSchema, 'courses');
 
 // Subscription Schema
 const subscriptionSchema = new mongoose.Schema({
-  courseId: String,
+  courseId: Number,
   title: String,
   description: String,
   duration: String,
@@ -48,9 +49,10 @@ app.get('/api/courses', async (req, res) => {
 
 // POST to create a new course
 app.post('/api/courses', async (req, res) => {
-  const { title, description, duration } = req.body;
+  const { courseId, title, description, duration } = req.body;
 
   const course = new Course({
+    courseId,
     title,
     description,
     duration,
@@ -65,9 +67,9 @@ app.post('/api/courses', async (req, res) => {
 });
 
 // DELETE an available course
-app.delete('/api/courses/:id', async (req, res) => {
+app.delete('/api/courses/:courseId', async (req, res) => {
   try {
-    const course = await Course.findByIdAndDelete(req.params.id);
+    const course = await Course.findOneAndDelete({ courseId: req.params.courseId });
     if (!course) return res.status(404).json({ message: 'Course not found' });
     res.json({ message: 'Course deleted' });
   } catch (err) {
@@ -88,6 +90,7 @@ app.post('/api/subscribed', async (req, res) => {
 
   try {
     const newSubscription = await subscription.save();
+    console.log(newSubscription);
     res.status(201).json(newSubscription);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -95,15 +98,16 @@ app.post('/api/subscribed', async (req, res) => {
 });
 
 // DELETE a subscription
-app.delete('/api/subscribed/:id', async (req, res) => {
+app.delete('/api/subscribed/:courseId', async (req, res) => {
   try {
-    const subscription = await Subscription.findByIdAndDelete(req.params.id);
+    const subscription = await Subscription.findOneAndDelete({ courseId: req.params.courseId });
     if (!subscription) return res.status(404).json({ message: 'Subscription not found' });
     res.json({ message: 'Subscription deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
+
 
 // GET all subscriptions
 app.get('/api/subscribed', async (req, res) => {

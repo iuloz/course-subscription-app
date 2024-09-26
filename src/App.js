@@ -26,15 +26,14 @@ function App() {
   }, []);
 
   const handleSubscribe = async (course) => {
-    if (!subscribedCourses.some((c) => c.courseId === course._id)) {
-      // Subscribe to the course
+    if (!subscribedCourses.some((c) => c.courseId === course.courseId)) {
       const response = await fetch('http://localhost:5000/api/subscribed', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          courseId: course._id, // Ensure courseId is sent here
+          courseId: course.courseId,
           title: course.title,
           description: course.description,
           duration: course.duration,
@@ -42,18 +41,24 @@ function App() {
       });
 
       if (response.ok) {
+        console.log("response is ok");
+        console.log(`http://localhost:5000/api/courses/${course.courseId}`);
+
         // Remove from available courses
-        await fetch(`http://localhost:5000/api/courses/${course._id}`, {
+        await fetch(`http://localhost:5000/api/courses/${course.courseId}`, {
           method: 'DELETE',
         });
 
         setSubscribedCourses([...subscribedCourses, {
-          courseId: course._id,
+          courseId: course.courseId,
           title: course.title,
           description: course.description,
           duration: course.duration
         }]);
-        setCourses(courses.filter(c => c._id !== course._id));
+
+        console.log(courses.filter(c => c.courseId !== course.courseId));
+
+        setCourses(courses.filter(c => c.courseId !== course.courseId));
       } else {
         console.error('Failed to subscribe:', await response.json());
       }
@@ -63,7 +68,6 @@ function App() {
 
   const handleUnsubscribe = async (subscription) => {
     console.log(subscription.courseId);
-    // Unsubscribe from the course
     await fetch(`http://localhost:5000/api/subscribed/${subscription.courseId}`, {
       method: 'DELETE',
     });
@@ -75,14 +79,20 @@ function App() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        courseId: subscription.courseId,
         title: subscription.title,
         description: subscription.description,
         duration: subscription.duration,
       }),
     });
 
-    setSubscribedCourses(subscribedCourses.filter((c) => c._id !== subscription._id));
-    setCourses([...courses, { _id: subscription.courseId, title: subscription.title, description: subscription.description, duration: subscription.duration }]);
+    setSubscribedCourses(subscribedCourses.filter((c) => c.courseId !== subscription.courseId));
+    setCourses([...courses, {
+      courseId: subscription.courseId,
+      title: subscription.title,
+      description: subscription.description,
+      duration: subscription.duration
+    }]);
   };
 
   const handleOnDragEnd = (result) => {
@@ -117,7 +127,7 @@ function App() {
                 <div className="course-list" {...provided.droppableProps} ref={provided.innerRef}>
                   <h2>Available Courses</h2>
                   {courses.map((course, index) => (
-                    <Draggable key={course._id} draggableId={course._id} index={index}>
+                    <Draggable key={index} draggableId={index.toString()} index={index}>
                       {(provided) => (
                         <div
                           ref={provided.innerRef}
@@ -127,7 +137,7 @@ function App() {
                         >
                           <h3>{course.title}</h3>
                           <p>{course.description}</p>
-                          <p>Duration: {course.duration} hours</p>
+                          <p>Duration: {course.duration}</p>
                           <button onClick={() => handleSubscribe(course)}>Subscribe</button>
                         </div>
                       )}
@@ -157,8 +167,7 @@ function App() {
                       <div key={index} className="subscribed-course-card">
                         <h3>{subscription.title}</h3>
                         <p>{subscription.description}</p>
-                        <p>{subscription.courseId}</p>
-                        <p>Duration: {subscription.duration} hours</p>
+                        <p>Duration: {subscription.duration}</p>
                         <button onClick={() => handleUnsubscribe(subscription)}>Unsubscribe</button>
                       </div>
                     ))
