@@ -1,16 +1,18 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
 const port = 5000;
+const mongoUri = process.env.MONGODB_URI;
 
 // Middleware
 app.use(express.json());
 app.use(cors());
 
 // MongoDB connection
-mongoose.connect('mongodb+srv://doadmin:J07269aVpoe35Bf4@db-mongodb-new-analytics-test-3a2744f1.mongo.ondigitalocean.com/admin?tls=true&authSource=admin', {
+mongoose.connect(mongoUri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
