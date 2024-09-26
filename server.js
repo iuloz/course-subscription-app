@@ -7,11 +7,9 @@ const app = express();
 const port = 5000;
 const mongoUri = process.env.MONGODB_URI;
 
-// Middleware
 app.use(express.json());
 app.use(cors());
 
-// MongoDB connection
 mongoose.connect(mongoUri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -19,7 +17,6 @@ mongoose.connect(mongoUri, {
   .then(() => console.log('MongoDB connected...'))
   .catch((err) => console.error(err));
 
-// Course Schema
 const courseSchema = new mongoose.Schema({
   courseId: Number,
   title: String,
@@ -29,7 +26,6 @@ const courseSchema = new mongoose.Schema({
 
 const Course = mongoose.model('Course', courseSchema, 'courses');
 
-// Subscription Schema
 const subscriptionSchema = new mongoose.Schema({
   courseId: Number,
   title: String,
@@ -39,7 +35,6 @@ const subscriptionSchema = new mongoose.Schema({
 
 const Subscription = mongoose.model('Subscription', subscriptionSchema, 'subscribed');
 
-// GET all available courses
 app.get('/api/courses', async (req, res) => {
   try {
     const courses = await Course.find();
@@ -49,7 +44,6 @@ app.get('/api/courses', async (req, res) => {
   }
 });
 
-// POST to create a new course
 app.post('/api/courses', async (req, res) => {
   const { courseId, title, description, duration } = req.body;
 
@@ -68,7 +62,6 @@ app.post('/api/courses', async (req, res) => {
   }
 });
 
-// DELETE an available course
 app.delete('/api/courses/:courseId', async (req, res) => {
   try {
     const course = await Course.findOneAndDelete({ courseId: req.params.courseId });
@@ -79,7 +72,6 @@ app.delete('/api/courses/:courseId', async (req, res) => {
   }
 });
 
-// POST to subscribe to a course
 app.post('/api/subscribed', async (req, res) => {
   const { courseId, title, description, duration } = req.body;
 
@@ -99,7 +91,6 @@ app.post('/api/subscribed', async (req, res) => {
   }
 });
 
-// DELETE a subscription
 app.delete('/api/subscribed/:courseId', async (req, res) => {
   try {
     const subscription = await Subscription.findOneAndDelete({ courseId: req.params.courseId });
@@ -110,8 +101,6 @@ app.delete('/api/subscribed/:courseId', async (req, res) => {
   }
 });
 
-
-// GET all subscriptions
 app.get('/api/subscribed', async (req, res) => {
   try {
     const subscriptions = await Subscription.find();
@@ -121,7 +110,6 @@ app.get('/api/subscribed', async (req, res) => {
   }
 });
 
-// Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
